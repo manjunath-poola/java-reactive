@@ -1,0 +1,83 @@
+Reactive :
+   reactive programming is a declarative programming paradigm concerned with data streams and the propagation of change.
+   With this paradigm, it's possible to express static (e.g., arrays) or dynamic (e.g., event emitters) data streams with ease,
+   and also communicate that an inferred dependency within the associated execution model exists, which facilitates the
+   automatic propagation of the changed data flow.
+
+Use cases :
+  1. User events :
+           a. example working on UI, when user clicks on a button you want to do something. You are reacting to the button clicks
+           b. When I/O response happens when file read completes or writes complete
+
+Server Side web development
+Steps :  a. request comes b. do processing 3. return response
+
+Why Backend developers need to care reactive
+  a. High data scale
+  b. High usage scale
+  c. Cloud based costs  // bad code makes you charge more on cloud
+
+How to scale up
+    a. Vertical scaling
+    b. Horizontal scaling
+
+Code Example :
+  we have method like
+  @GetMapping(/user/{userId})
+  public User getUserDetails(@PathVariable String userId){
+    User user = userService.getUser(userId).
+    UserPreference userPreference = UserPreferenceService.getUserPreference(userId).
+    user.setUserPreference(userPreference);
+    return user;
+  }
+Note : when we see below two lines, both does call 2 different services and get the results and combine returning to the User
+    User user userService.getUser(userId).
+    UserPreference userPreference UserPreferenceService.getUserPreference(userId).
+
+Issue : both above are blocking calls., these 2 are unnecessarily sequential calls.
+
+Cost:
+ Performance
+
+1. WebApplication for each request one Thread will be created for processing..
+
+request   --->   Thread ---->
+request   --->   Thread ---->
+request   --->   Thread ---->
+  |                 |
+request   --->   Thread ---->
+
+2. Idling Threads for I/O or netweork calls
+
+Cost
+Wasted hardware
+
+Spoilt backend developers
+
+With SpringMVC we code like
+    1. It's a single request.
+    2. Multiple simultaneous users abstracted out
+    3. Delays abstracted out
+    4. we pay with sequential blocking operations
+    5. we pay with idling threads
+
+But wait, we have concurrency API's tp achieve the parallel programming. Since Java-8
+ Example : CompletableFuture<User> userAsync = CompletableFuture.supplyAsync(()->userService.getUser(userId));
+ Implements 'Future' and goes behind it
+ Works with 'CompletionStage' to co-ordinate async operations.
+
+    a. Call UserService
+    b. call userProfileService in Parallel
+    c. when both return, merge the data structures
+    d. Return merged object
+
+Code:
+  CompletableFuture<User> userAsync = CompletableFuture.supplyAsync(()->userService.getUser(userId));
+  CompletableFuture<User> userProfileAsync = CompletableFuture.supplyAsync(()->userProfileService.getUserProfile(userId));
+  CompletableFuture<User> bothFutureAsync = CompletableFuture.allOf(userAsync,userProfileAsync);
+  bothFutureAsync.join(); // join from CompletableFuture, it is still blocking.
+
+
+
+
+
