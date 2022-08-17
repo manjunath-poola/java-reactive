@@ -77,7 +77,102 @@ Code:
   CompletableFuture<User> bothFutureAsync = CompletableFuture.allOf(userAsync,userProfileAsync);
   bothFutureAsync.join(); // join from CompletableFuture, it is still blocking.
 
+Issues with above
+1.Too much for the dev to do
+2.Error handling is messy
+3.It's still sync after all
+4.we need a new Paradigm
+5.The framework needs to support it
+
+our superhero comes in here: ** Reactive **
+
+code will be
+public Mono<User> getUser(@PathVariable String userId){
+      return userService.getUser(userId)
+                 .zipWith(userProfileService.getUserProfile(userId))
+                 .map(tuple->{
+                    User user = tuple.getT1();
+                    user.setUserPreferences(tuple.getT2());
+                    return user;
+                 });
+}
+==> Code is simple. instead of doing manual
+Few reusable flexible functions
+Combine and reuse in powerful ways.
+
+==>> Declarative code to build asynchronous processing pipelines.
+  1.Different way of thinking about flow
+  2.Different way of thinking about data
+  3.Integrated with Java9 'Flow' interface.
+
+<<<Learning curve.>>>
+
+it is not needed for a simple projects. benefits will be more for when application grows.
+
+Topics
+
+Collection streams :
+      Stream -- Represents a sequence of data, we focus on computation vs collections which focus on storage. Iterations are done internally.
+      List<Integer> numbers = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+      1.map
+      2.filter
+      3.flatMap
+      4.findFirst
+      5.findAny
+check the Exercise1 for the samples for above.
+In Streams each step will return the new Stream.
+----------------------------------------
+            Design Patterns
+----------------------------------------
+1. Iterator pattern  --  decouples the algorithms   Iterator ---> Consumer(asks the data for next)
+                                                (data)
+                    Container ---> IteratorImpl  --> Consumer
+
+2. Observer pattern -- can be used when you want to Observe something goes on.
+    Subject notifies to its subscribers when something happens.
+                (Register)
+      Source <------------------ Consumer
+            (Data)
+      Source -----> Observer
+      (here source controls data, i have data you take)
+When ?
+ Iterator prints the elements in a collection.
+ Observer, listen the mouse clicks and prints all.
+
+Reactive Syntax
+
+cliksChannel
+        .filter(Objects::nonNUll)
+        .subscribe(e->System.out.println(e));
+
+Assembly line analogy is a Stream
+True Assembly line. Comes over time.
+
+-------------------
+    Flow  Java--9
+-------------------
+Publisher
+Subscriber
+Subscription
+
+All those are interfaces, no implementation on Java-9
+
+What we are going to Use:   1. Flex 2.Mono
+
+Flex -- supports asynchronous events 0 or n items
+Mono -- supports asynchronous event 0 or 1 items
+
+Mono-- emits the value we are done with it.
+
+Reactive can do below o/p's
+        1. An Item
+        2. A complete event  (Terminal)
+        3. A failure event   (Terminal)
 
 
-
-
+subscribe();
+subscribe(Consumer<? super T consumer>);
+subscribe(Consumer<? super T> consumer,Consumer<? super Throwable> errorConsumer);
+subscribe(Consumer<? super T> consumer,Consumer<? super Throwable> errorConsumer,Runnable completeConsumer);
+subscribe(Consumer<? super T> consumer,Consumer<? super Throwable> errorConsumer,Runnable completeConsumer,
+                                       Consumer<? super Subscription> subscriptionConsumer);
